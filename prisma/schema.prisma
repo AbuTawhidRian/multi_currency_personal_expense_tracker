@@ -7,3 +7,280 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
+// NextAuth Required Models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // For Credentials provider
+
+  accounts      Account[]
+  sessions      Session[]
+  
+  // Custom Expat Finance Relations
+  profile               Profile?
+  transactions          Transaction[]
+  categories            Category[]
+  exchangeRates         ExchangeRate[]
+  budgets               Budget[]
+  recurringTransactions RecurringTransaction[]
+  paymentMethods        PaymentMethod[]
+  notifications         Notification[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// -----------------------------------------------------------------------------
+// Expat Finance Core Models
+// -----------------------------------------------------------------------------
+
+model Profile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  currentCountryId   String?
+  homeCountryId      String?
+  reportingCurrencyId String?
+  
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentCountry     Country? @relation("CurrentCountry", fields: [currentCountryId], references: [id])
+  homeCountry        Country? @relation("HomeCountry", fields: [homeCountryId], references: [id])
+  reportingCurrency  Currency? @relation(fields: [reportingCurrencyId], references: [id])
+  
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Country {
+  id          String   @id @default(cuid())
+  name        String
+  isoCode     String   @unique // e.g., AE, BD, SA
+  flag        String?  // Emoji or URL
+  
+  // Inverse relations for profile
+  profilesCurrent Profile[] @relation("CurrentCountry")
+  profilesHome    Profile[] @relation("HomeCountry")
+  
+  transactions Transaction[]
+  budgets      Budget[]
+  recurring    RecurringTransaction[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Currency {
+  id          String   @id @default(cuid())
+  code        String   @unique // e.g., AED, BDT, USD
+  name        String
+  symbol      String
+  
+  // Inverse relations
+  profilesReporting Profile[]
+  transactions      Transaction[] @relation("TransactionCurrency")
+  reportingTrans    Transaction[] @relation("ReportingCurrency")
+  budgets           Budget[]
+  recurring         RecurringTransaction[]
+  ratesFrom         ExchangeRate[] @relation("FromCurrency")
+  ratesTo           ExchangeRate[] @relation("ToCurrency")
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+  BOTH
+}
+
+model Category {
+  id          String       @id @default(cuid())
+  userId      String?      // Null if default category
+  name        String
+  type        CategoryType
+  icon        String?
+  isDefault   Boolean      @default(false)
+  isActive    Boolean      @default(true)
+  
+  user        User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  budgets      Budget[]
+  recurring    RecurringTransaction[]
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([userId])
+}
+
+model PaymentMethod {
+  id          String   @id @default(cuid())
+  userId      String?  // Null if default (Cash, Bank, etc)
+  name        String
+  isDefault   Boolean  @default(false)
+  
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  recurring    RecurringTransaction[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+}
+
+model ExchangeRate {
+  id             String   @id @default(cuid())
+  userId         String
+  fromCurrencyId String
+  toCurrencyId   String
+  rate           Decimal  @db.Decimal(18, 6)
+  effectiveDate  DateTime @default(now())
+  
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromCurrency   Currency @relation("FromCurrency", fields: [fromCurrencyId], references: [id])
+  toCurrency     Currency @relation("ToCurrency", fields: [toCurrencyId], references: [id])
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, fromCurrencyId, toCurrencyId])
+}
+
+model Transaction {
+  id                  String          @id @default(cuid())
+  userId              String
+  type                TransactionType
+  countryId           String
+  categoryId          String
+  amount              Decimal         @db.Decimal(18, 4)
+  currencyId          String
+  reportingCurrencyId String
+  exchangeRate        Decimal         @db.Decimal(18, 6)
+  convertedAmount     Decimal         @db.Decimal(18, 4)
+  date                DateTime
+  paymentMethodId     String?
+  description         String?
+  note                String?         @db.Text
+  attachmentUrl       String?
+  
+  user                User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  country             Country         @relation(fields: [countryId], references: [id])
+  category            Category        @relation(fields: [categoryId], references: [id])
+  currency            Currency        @relation("TransactionCurrency", fields: [currencyId], references: [id])
+  reportingCurrency   Currency        @relation("ReportingCurrency", fields: [reportingCurrencyId], references: [id])
+  paymentMethod       PaymentMethod?  @relation(fields: [paymentMethodId], references: [id])
+  
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  @@index([userId])
+  @@index([userId, date])
+  @@index([userId, countryId])
+  @@index([userId, categoryId])
+}
+
+model Budget {
+  id          String   @id @default(cuid())
+  userId      String
+  countryId   String?  // Optional, budget could be global or country-specific
+  categoryId  String
+  currencyId  String
+  amount      Decimal  @db.Decimal(18, 4)
+  period      String   // e.g., 'MONTHLY', 'YEARLY'
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  country     Country? @relation(fields: [countryId], references: [id])
+  category    Category @relation(fields: [categoryId], references: [id])
+  currency    Currency @relation(fields: [currencyId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model RecurringTransaction {
+  id              String          @id @default(cuid())
+  userId          String
+  type            TransactionType
+  countryId       String
+  categoryId      String
+  amount          Decimal         @db.Decimal(18, 4)
+  currencyId      String
+  frequency       String          // 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'
+  startDate       DateTime
+  endDate         DateTime?
+  paymentMethodId String?
+  description     String?
+  
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  country         Country         @relation(fields: [countryId], references: [id])
+  category        Category        @relation(fields: [categoryId], references: [id])
+  currency        Currency        @relation(fields: [currencyId], references: [id])
+  paymentMethod   PaymentMethod?  @relation(fields: [paymentMethodId], references: [id])
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([userId])
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  message     String
+  isRead      Boolean  @default(false)
+  type        String   // 'BUDGET_ALERT', 'SYSTEM', 'REMINDER'
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
