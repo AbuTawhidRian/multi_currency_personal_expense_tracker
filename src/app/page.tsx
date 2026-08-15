@@ -14,6 +14,7 @@ import {
   Menu,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AuthButtons, HeroCTA, BottomCTA } from '@/components/landing/auth-buttons';
 
 /* ─── Static data ─────────────────────────────────────────── */
 
@@ -139,18 +140,7 @@ export default function LandingPage() {
 
           {/* CTA */}
           <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="hidden sm:block text-sm font-medium text-white/60 hover:text-white transition-colors"
-            >
-              Sign In
-            </Link>
-            <Button
-              render={<Link href="/register" />}
-              className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 shadow-lg shadow-violet-500/25 transition-all duration-200"
-            >
-              Get Started
-            </Button>
+            <AuthButtons />
             {/* Mobile menu icon (non-functional, visual only) */}
             <button className="sm:hidden p-2 rounded-lg hover:bg-white/10 transition-colors">
               <Menu size={18} />
@@ -208,21 +198,7 @@ export default function LandingPage() {
 
           {/* CTA buttons */}
           <div className="animate-fade-in-up delay-300 relative z-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <Button
-              size="lg"
-              className="h-13 px-8 text-base bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 shadow-xl shadow-violet-500/30 transition-all duration-200 hover:scale-105"
-              render={<Link href="/register" />}
-            >
-              Start Tracking Free
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="h-13 px-8 text-base border-white/15 bg-white/5 text-white hover:bg-white/10 hover:border-white/25 backdrop-blur-sm transition-all duration-200"
-            >
-              View Demo
-            </Button>
+            <HeroCTA />
           </div>
 
           {/* Trust note */}
@@ -389,23 +365,7 @@ export default function LandingPage() {
                 <p className="text-white/65 text-lg mb-8 max-w-lg mx-auto">
                   Join thousands of expats who finally have a clear picture of their global finances.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button
-                    size="lg"
-                    className="bg-white text-indigo-700 hover:bg-white/90 border-0 font-bold px-8 h-12 text-base shadow-xl transition-all duration-200 hover:scale-105"
-                    render={<Link href="/register" />}
-                  >
-                    Create Free Account
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-white/30 bg-white/10 text-white hover:bg-white/20 backdrop-blur-sm h-12 px-8 text-base transition-all duration-200"
-                  >
-                    Learn More
-                  </Button>
-                </div>
+                <BottomCTA />
                 <p className="mt-5 text-xs text-white/40 flex items-center justify-center gap-1.5">
                   <ShieldCheck size={12} />
                   Free forever · No credit card · Cancel anytime

@@ -1,7 +1,8 @@
 "use client";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, PieChart, Wallet, ArrowRightLeft, Globe, ReceiptText, Settings, CreditCard, LayoutDashboard } from 'lucide-react';
+import { PieChart, Wallet, ArrowRightLeft, Globe, ReceiptText, Settings, CreditCard, LayoutDashboard, LogOut } from 'lucide-react';
+import { signOut, useSession } from 'next-auth/react';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -16,6 +17,7 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   return (
     <aside className="hidden md:flex flex-col w-64 border-r bg-card min-h-screen px-4 py-6 sticky top-0">
@@ -48,7 +50,7 @@ export function Sidebar() {
         })}
       </nav>
       
-      <div className="mt-auto px-2 py-4">
+      <div className="mt-auto space-y-3 px-2 py-4">
         <div className="bg-muted p-4 rounded-xl border">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Reporting Currency</p>
           <div className="flex items-end gap-2 mt-1">
@@ -56,7 +58,26 @@ export function Sidebar() {
             <p className="text-xs text-muted-foreground mb-0.5">UAE Dirham</p>
           </div>
         </div>
+
+        {/* User info + Logout */}
+        <div className="flex items-center gap-3 px-1">
+          <div className="h-8 w-8 rounded-full bg-primary/15 flex items-center justify-center text-xs font-bold text-primary shrink-0">
+            {session?.user?.name?.[0]?.toUpperCase() || session?.user?.email?.[0]?.toUpperCase() || '?'}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{session?.user?.name || 'User'}</p>
+            <p className="text-xs text-muted-foreground truncate">{session?.user?.email}</p>
+          </div>
+          <button
+            onClick={() => signOut({ callbackUrl: '/' })}
+            className="p-2 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+            title="Sign out"
+          >
+            <LogOut size={16} />
+          </button>
+        </div>
       </div>
     </aside>
   );
 }
+
