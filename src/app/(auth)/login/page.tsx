@@ -1,10 +1,46 @@
+"use client";
+
+import * as React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowRight, Mail, Lock, ShieldCheck } from 'lucide-react';
+import { signIn } from 'next-auth/react';
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [error, setError] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (res?.error) {
+        throw new Error(res.error);
+      }
+
+      router.push('/dashboard');
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message || 'Invalid credentials');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="animate-fade-in-up">
       {/* Header */}
@@ -40,7 +76,13 @@ export default function LoginPage() {
       </div>
 
       {/* Form */}
-      <form className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Email */}
         <div className="space-y-1.5">
           <Label htmlFor="email" className="text-sm font-medium text-white/70">
@@ -54,6 +96,8 @@ export default function LoginPage() {
             <Input
               id="email"
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
               className="pl-9 bg-white/[0.05] border-white/10 text-white placeholder:text-white/25 focus:border-violet-500/60 focus:ring-violet-500/20 rounded-xl h-11 transition-all"
@@ -82,6 +126,8 @@ export default function LoginPage() {
             <Input
               id="password"
               type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
               className="pl-9 bg-white/[0.05] border-white/10 text-white placeholder:text-white/25 focus:border-violet-500/60 focus:ring-violet-500/20 rounded-xl h-11 transition-all"
@@ -91,12 +137,12 @@ export default function LoginPage() {
 
         {/* Submit */}
         <Button
-          type="button"
+          type="submit"
+          disabled={loading}
           className="w-full h-11 mt-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 rounded-xl font-semibold shadow-lg shadow-violet-500/25 transition-all duration-200 hover:scale-[1.02]"
-          render={<Link href="/dashboard" />}
         >
-          Sign In
-          <ArrowRight className="ml-2 h-4 w-4" />
+          {loading ? 'Signing in...' : 'Sign In'}
+          {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
         </Button>
       </form>
 

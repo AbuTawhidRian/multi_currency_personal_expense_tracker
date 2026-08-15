@@ -1,20 +1,13 @@
 import Link from 'next/link';
-import { Globe2, Globe } from 'lucide-react';
-
-/* Feature bullets shown on the left panel */
-const PERKS = [
-  { emoji: '🌍', text: 'Track expenses across 90+ currencies' },
-  { emoji: '📊', text: 'Smart insights with live exchange rates' },
-  { emoji: '🔒', text: 'Bank-level security for your data' },
-  { emoji: '⚡', text: 'Set up in under 2 minutes' },
-];
+import { Globe2 } from 'lucide-react';
+import { AuthCarousel } from '@/components/auth-carousel';
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#080b14] flex overflow-hidden">
 
       {/* ── Left decorative panel (hidden on mobile) ──────── */}
-      <div className="hidden lg:flex lg:w-[52%] relative flex-col justify-between p-12 overflow-hidden">
+      <div className="hidden lg:flex lg:w-[52%] relative flex-col p-12 overflow-hidden">
         {/* Background orbs */}
         <div
           aria-hidden
@@ -35,8 +28,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           className="absolute inset-0 hero-mesh pointer-events-none"
         />
 
-        {/* Content */}
-        <div className="relative z-10">
+        {/* Top Navigation */}
+        <div className="relative z-20 mb-12">
           <Link href="/" className="inline-flex items-center gap-2.5 hover:opacity-80 transition-opacity">
             <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-500/30">
               <Globe2 size={20} className="text-white" />
@@ -45,44 +38,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </Link>
         </div>
 
-        <div className="relative z-10 space-y-10">
-          <div>
-            <h2 className="text-4xl font-extrabold text-white leading-tight mb-4">
-              Your money,{' '}
-              <span className="landing-gradient-text">everywhere it goes</span>
-            </h2>
-            <p className="text-white/50 text-lg leading-relaxed max-w-sm">
-              The expense tracker built for expats, remote workers, and global citizens.
-            </p>
-          </div>
-
-          <ul className="space-y-4">
-            {PERKS.map((p) => (
-              <li key={p.text} className="flex items-center gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.06] border border-white/10 text-lg shrink-0">
-                  {p.emoji}
-                </span>
-                <span className="text-sm text-white/65">{p.text}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Testimonial quote */}
-        <div className="relative z-10 glass-card rounded-2xl p-5">
-          <p className="text-sm text-white/65 italic leading-relaxed mb-3">
-            &ldquo;ExpatFi is the only app that truly understands the expat financial lifestyle.
-            I earn in AED and send money home in BDT — it handles everything flawlessly.&rdquo;
-          </p>
-          <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center text-xs font-bold text-white">
-              S
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-white">Sarah M.</div>
-              <div className="text-xs text-white/40">Software Engineer · Dubai</div>
-            </div>
-          </div>
+        {/* Carousel Content */}
+        <div className="relative z-10 flex-1 flex flex-col justify-center">
+          <AuthCarousel />
         </div>
       </div>
 

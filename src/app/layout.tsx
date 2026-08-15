@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
+import { SessionProvider } from "@/components/providers/session-provider";
 import "./globals.css";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-sans" });
@@ -17,7 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${outfit.variable} font-sans antialiased bg-muted/20 text-foreground`}>
-        {children}
+        <SessionProvider>
+          {children}
+        </SessionProvider>
       </body>
     </html>
   );

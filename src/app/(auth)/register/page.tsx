@@ -1,8 +1,13 @@
+"use client";
+
+import * as React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ArrowRight, Mail, Lock, User, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { signIn } from 'next-auth/react';
 
 const PASSWORD_HINTS = [
   'At least 8 characters',
@@ -11,6 +16,50 @@ const PASSWORD_HINTS = [
 ];
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const [name, setName] = React.useState('');
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [error, setError] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || 'Something went wrong');
+      }
+
+      // Auto login after registration
+      const loginRes = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (loginRes?.error) {
+        throw new Error(loginRes.error);
+      }
+
+      router.push('/onboarding');
+      router.refresh();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="animate-fade-in-up">
       {/* Header */}
@@ -46,7 +95,13 @@ export default function RegisterPage() {
       </div>
 
       {/* Form */}
-      <form className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Full Name */}
         <div className="space-y-1.5">
           <Label htmlFor="name" className="text-sm font-medium text-white/70">
@@ -60,6 +115,8 @@ export default function RegisterPage() {
             <Input
               id="name"
               type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               placeholder="Muhammad Rahman"
               required
               className="pl-9 bg-white/[0.05] border-white/10 text-white placeholder:text-white/25 focus:border-violet-500/60 focus:ring-violet-500/20 rounded-xl h-11 transition-all"
@@ -80,6 +137,8 @@ export default function RegisterPage() {
             <Input
               id="email"
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
               className="pl-9 bg-white/[0.05] border-white/10 text-white placeholder:text-white/25 focus:border-violet-500/60 focus:ring-violet-500/20 rounded-xl h-11 transition-all"
@@ -100,8 +159,11 @@ export default function RegisterPage() {
             <Input
               id="password"
               type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
+              minLength={8}
               className="pl-9 bg-white/[0.05] border-white/10 text-white placeholder:text-white/25 focus:border-violet-500/60 focus:ring-violet-500/20 rounded-xl h-11 transition-all"
             />
           </div>
@@ -131,12 +193,12 @@ export default function RegisterPage() {
 
         {/* Submit */}
         <Button
-          type="button"
+          type="submit"
+          disabled={loading}
           className="w-full h-11 mt-1 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 rounded-xl font-semibold shadow-lg shadow-violet-500/25 transition-all duration-200 hover:scale-[1.02]"
-          render={<Link href="/onboarding" />}
         >
-          Create Account
-          <ArrowRight className="ml-2 h-4 w-4" />
+          {loading ? 'Creating Account...' : 'Create Account'}
+          {!loading && <ArrowRight className="ml-2 h-4 w-4" />}
         </Button>
       </form>
 
