@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, CreditCard, TrendingUp, PieChart } from "lucide-react";
 import { AddTransactionModal } from "@/components/transactions/add-transaction-modal";
+import { checkBudgetAlerts } from "@/actions/notification";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -12,6 +13,9 @@ export default async function DashboardPage() {
   if (!session?.user) {
     redirect("/login");
   }
+
+  // Reconcile budget alerts on dashboard load
+  await checkBudgetAlerts(session.user.id);
 
   const profile = await prisma.profile.findUnique({
     where: { userId: session.user.id },

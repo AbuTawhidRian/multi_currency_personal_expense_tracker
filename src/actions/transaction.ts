@@ -86,7 +86,7 @@ export async function addTransaction(data: AddTransactionInput) {
       await checkBudgetAlerts(session.user.id);
     }
     
-    return { success: true, transaction };
+    return { success: true };
   } catch (error) {
     console.error("Add transaction error:", error);
     return { success: false, error: "Internal server error" };
@@ -188,7 +188,7 @@ export async function updateTransaction(id: string, data: AddTransactionInput) {
       await checkBudgetAlerts(session.user.id);
     }
 
-    return { success: true, transaction };
+    return { success: true };
   } catch (error) {
     console.error("Update transaction error:", error);
     return { success: false, error: "Internal server error" };

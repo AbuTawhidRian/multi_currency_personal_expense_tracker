@@ -20,13 +20,14 @@ export function AuthButtons() {
   if (session) {
     return (
       <div className="flex items-center gap-3">
-        <Button
-          render={<Link href="/dashboard" />}
-          className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 shadow-lg shadow-violet-500/25 transition-all duration-200"
-        >
-          <LayoutDashboard className="mr-2 h-4 w-4" />
-          Dashboard
-        </Button>
+        <Link href="/dashboard">
+          <Button
+            className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 shadow-lg shadow-violet-500/25 transition-all duration-200"
+          >
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            Dashboard
+          </Button>
+        </Link>
       </div>
     );
   }
@@ -39,12 +40,13 @@ export function AuthButtons() {
       >
         Sign In
       </Link>
-      <Button
-        render={<Link href="/register" />}
-        className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 shadow-lg shadow-violet-500/25 transition-all duration-200"
-      >
-        Get Started
-      </Button>
+      <Link href="/register">
+        <Button
+          className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 shadow-lg shadow-violet-500/25 transition-all duration-200"
+        >
+          Get Started
+        </Button>
+      </Link>
     </div>
   );
 }
@@ -63,29 +65,31 @@ export function HeroCTA() {
   if (session) {
     return (
       <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-        <Button
-          size="lg"
-          className="h-13 px-8 text-base bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 shadow-xl shadow-violet-500/30 transition-all duration-200 hover:scale-105"
-          render={<Link href="/dashboard" />}
-        >
-          <LayoutDashboard className="mr-2 h-4 w-4" />
-          Go to Dashboard
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
+        <Link href="/dashboard">
+          <Button
+            size="lg"
+            className="h-13 px-8 text-base bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 shadow-xl shadow-violet-500/30 transition-all duration-200 hover:scale-105"
+          >
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            Go to Dashboard
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </Link>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-      <Button
-        size="lg"
-        className="h-13 px-8 text-base bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 shadow-xl shadow-violet-500/30 transition-all duration-200 hover:scale-105"
-        render={<Link href="/register" />}
-      >
-        Start Tracking Free
-        <ArrowRight className="ml-2 h-4 w-4" />
-      </Button>
+      <Link href="/register">
+        <Button
+          size="lg"
+          className="h-13 px-8 text-base bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white border-0 shadow-xl shadow-violet-500/30 transition-all duration-200 hover:scale-105"
+        >
+          Start Tracking Free
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </Link>
       <Button
         size="lg"
         variant="outline"
@@ -111,29 +115,31 @@ export function BottomCTA() {
   if (session) {
     return (
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <Button
-          size="lg"
-          className="bg-white text-indigo-700 hover:bg-white/90 border-0 font-bold px-8 h-12 text-base shadow-xl transition-all duration-200 hover:scale-105"
-          render={<Link href="/dashboard" />}
-        >
-          <LayoutDashboard className="mr-2 h-4 w-4" />
-          Go to Dashboard
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
+        <Link href="/dashboard">
+          <Button
+            size="lg"
+            className="bg-white text-indigo-700 hover:bg-white/90 border-0 font-bold px-8 h-12 text-base shadow-xl transition-all duration-200 hover:scale-105"
+          >
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            Go to Dashboard
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </Link>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col sm:flex-row gap-3 justify-center">
-      <Button
-        size="lg"
-        className="bg-white text-indigo-700 hover:bg-white/90 border-0 font-bold px-8 h-12 text-base shadow-xl transition-all duration-200 hover:scale-105"
-        render={<Link href="/register" />}
-      >
-        Create Free Account
-        <ArrowRight className="ml-2 h-4 w-4" />
-      </Button>
+      <Link href="/register">
+        <Button
+          size="lg"
+          className="bg-white text-indigo-700 hover:bg-white/90 border-0 font-bold px-8 h-12 text-base shadow-xl transition-all duration-200 hover:scale-105"
+        >
+          Create Free Account
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </Link>
       <Button
         size="lg"
         variant="outline"
@@ -144,3 +150,4 @@ export function BottomCTA() {
     </div>
   );
 }
+

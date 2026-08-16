@@ -347,7 +347,12 @@ export default async function ExpensesPage(props: {
 
                           <div className="pl-3 border-l border-white/5">
                             <TransactionCardActions
-                              transaction={tx}
+                              transaction={{
+                                ...tx,
+                                amount: Number(tx.amount),
+                                convertedAmount: Number(tx.convertedAmount),
+                                exchangeRate: Number(tx.exchangeRate),
+                              }}
                               countries={countries}
                               currencies={currencies}
                               categories={categories}

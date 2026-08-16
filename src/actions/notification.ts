@@ -184,9 +184,6 @@ export async function getNotifications(): Promise<{
       return { notifications: [], unreadCount: 0 };
     }
 
-    // Automatically check budget alerts on fetch to keep state fresh
-    await checkBudgetAlerts(session.user.id);
-
     const [notificationsRaw, unreadCount] = await Promise.all([
       prisma.notification.findMany({
         where: { userId: session.user.id },

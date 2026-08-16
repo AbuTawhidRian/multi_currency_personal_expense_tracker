@@ -51,53 +51,76 @@ export function TransactionsFilter() {
         />
       </div>
 
-      <Popover>
-        <PopoverTrigger 
-          render={
-            <button 
-              type="button"
-              className={`border rounded-md p-2 cursor-pointer transition-colors flex items-center justify-center ${type !== 'ALL' ? 'bg-primary/20 border-primary/50 text-primary' : 'bg-card hover:bg-muted text-muted-foreground'}`} 
-            />
-          } 
+      {/* Desktop Inline Filters */}
+      <div className="hidden sm:flex items-center p-1 bg-white/5 border border-white/10 rounded-lg">
+        <button
+          onClick={() => setType(type === "INCOME" ? "ALL" : "INCOME")}
+          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+            type === "INCOME" ? "bg-emerald-500/20 text-emerald-400" : "text-emerald-500/50 hover:text-emerald-400"
+          }`}
         >
-          <Filter size={20} />
-        </PopoverTrigger>
-        <PopoverContent align="end" className="w-48 p-2 flex flex-col gap-1 bg-card/95 backdrop-blur-md">
-          <p className="text-xs font-semibold text-muted-foreground mb-1 px-2 uppercase tracking-wider">Type Filter</p>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className={`justify-start ${type === "ALL" ? "bg-white/10" : ""}`}
-            onClick={() => setType("ALL")}
-          >
-            All Transactions
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className={`justify-start text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 ${type === "INCOME" ? "bg-emerald-500/10" : ""}`}
-            onClick={() => setType("INCOME")}
-          >
-            Income
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className={`justify-start text-rose-500 hover:text-rose-400 hover:bg-rose-500/10 ${type === "EXPENSE" ? "bg-rose-500/10" : ""}`}
-            onClick={() => setType("EXPENSE")}
-          >
-            Expense
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            className={`justify-start text-sky-500 hover:text-sky-400 hover:bg-sky-500/10 ${type === "TRANSFER" ? "bg-sky-500/10" : ""}`}
-            onClick={() => setType("TRANSFER")}
-          >
-            Transfer
-          </Button>
-        </PopoverContent>
-      </Popover>
+          Income
+        </button>
+        <button
+          onClick={() => setType(type === "EXPENSE" ? "ALL" : "EXPENSE")}
+          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+            type === "EXPENSE" ? "bg-rose-500/20 text-rose-400" : "text-rose-500/50 hover:text-rose-400"
+          }`}
+        >
+          Expense
+        </button>
+        <button
+          onClick={() => setType(type === "TRANSFER" ? "ALL" : "TRANSFER")}
+          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+            type === "TRANSFER" ? "bg-sky-500/20 text-sky-400" : "text-sky-500/50 hover:text-sky-400"
+          }`}
+        >
+          Transfer
+        </button>
+      </div>
+
+      {/* Mobile Popover Filter */}
+      <div className="sm:hidden">
+        <Popover>
+          <PopoverTrigger 
+            render={
+              <button 
+                type="button"
+                className={`border rounded-md p-2 h-10 w-10 cursor-pointer transition-colors flex items-center justify-center ${type !== 'ALL' ? 'bg-primary/20 border-primary/50 text-primary' : 'bg-card hover:bg-muted text-muted-foreground'}`} 
+              >
+                <Filter size={18} />
+              </button>
+            }
+          />
+          <PopoverContent align="end" className="w-48 p-2 flex flex-col gap-1 bg-card/95 backdrop-blur-md">
+            <p className="text-xs font-semibold text-muted-foreground mb-1 px-2 uppercase tracking-wider">Type Filter</p>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className={`justify-start text-emerald-500 hover:text-emerald-400 hover:bg-emerald-500/10 ${type === "INCOME" ? "bg-emerald-500/10" : ""}`}
+              onClick={() => setType(type === "INCOME" ? "ALL" : "INCOME")}
+            >
+              Income
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className={`justify-start text-rose-500 hover:text-rose-400 hover:bg-rose-500/10 ${type === "EXPENSE" ? "bg-rose-500/10" : ""}`}
+              onClick={() => setType(type === "EXPENSE" ? "ALL" : "EXPENSE")}
+            >
+              Expense
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className={`justify-start text-sky-500 hover:text-sky-400 hover:bg-sky-500/10 ${type === "TRANSFER" ? "bg-sky-500/10" : ""}`}
+              onClick={() => setType(type === "TRANSFER" ? "ALL" : "TRANSFER")}
+            >
+              Transfer
+            </Button>
+          </PopoverContent>
+        </Popover>
+      </div>
     </div>
   );
 }

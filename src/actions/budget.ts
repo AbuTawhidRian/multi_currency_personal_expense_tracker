@@ -62,7 +62,7 @@ export async function createBudget(data: BudgetInput) {
 
     await checkBudgetAlerts(session.user.id);
 
-    return { success: true, budget };
+    return { success: true };
   } catch (error) {
     console.error("Create budget error:", error);
     return { success: false, error: "Internal server error" };
@@ -123,7 +123,7 @@ export async function updateBudget(id: string, data: BudgetInput) {
 
     await checkBudgetAlerts(session.user.id);
 
-    return { success: true, budget };
+    return { success: true };
   } catch (error) {
     console.error("Update budget error:", error);
     return { success: false, error: "Internal server error" };

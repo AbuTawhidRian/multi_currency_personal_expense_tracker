@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Bell,
   CheckCheck,
@@ -10,7 +10,6 @@ import {
   Info,
   ExternalLink,
   Check,
-  X,
   RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
@@ -27,7 +26,6 @@ export function NotificationBell({ className = "" }: { className?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<"ALL" | "UNREAD">("ALL");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -49,18 +47,25 @@ export function NotificationBell({ className = "" }: { className?: string }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Close dropdown on outside click
+  // Close dropdown on outside click or Escape key
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
+    function handleEscapeKey(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    }
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleEscapeKey);
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscapeKey);
     };
   }, [isOpen]);
 
@@ -163,7 +168,7 @@ export function NotificationBell({ className = "" }: { className?: string }) {
 
       {/* Notification Dropdown Popover */}
       {isOpen && (
-        <div className="absolute right-0 sm:right-0 mt-2.5 w-[340px] sm:w-[400px] rounded-2xl bg-card border border-border/80 shadow-2xl z-50 overflow-hidden backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute right-0 mt-2.5 w-[calc(100vw-2rem)] max-w-[400px] rounded-2xl bg-card border border-border/80 shadow-2xl z-50 overflow-hidden backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150">
           {/* Header */}
           <div className="p-4 border-b border-border/60 bg-muted/30 flex items-center justify-between">
             <div className="flex items-center gap-2">

@@ -3,7 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { Wallet, CreditCard, ArrowRightLeft } from "lucide-react";
+import { Wallet, CreditCard, ArrowRightLeft, SearchX } from "lucide-react";
 import { TransactionCardActions } from "@/components/transactions/transaction-card-actions";
 import { TransactionsFilter } from "@/components/transactions/transactions-filter";
 import { Prisma } from "@prisma/client";
@@ -92,7 +92,7 @@ export default async function TransactionsPage(props: { searchParams?: Promise<{
 
   const getTypeStyles = (type: string) => {
     if (type === "INCOME") return { icon: Wallet, color: "text-emerald-500", bg: "bg-emerald-500/10" };
-    if (type === "EXPENSE") return { icon: CreditCard, color: "text-destructive", bg: "bg-destructive/10" };
+    if (type === "EXPENSE") return { icon: CreditCard, color: "text-rose-500", bg: "bg-rose-500/10" };
     return { icon: ArrowRightLeft, color: "text-sky-500", bg: "bg-sky-500/10" };
   };
 
@@ -112,8 +112,14 @@ export default async function TransactionsPage(props: { searchParams?: Promise<{
 
       <div className="space-y-8 mt-6">
         {sortedDates.length === 0 ? (
-          <div className="text-center p-12 bg-muted/20 border rounded-2xl text-muted-foreground">
-            No transactions found. Add a transaction to get started!
+          <div className="flex flex-col items-center justify-center p-16 bg-muted/20 border border-dashed rounded-2xl text-center">
+            <div className="bg-muted p-4 rounded-full mb-4">
+              <SearchX size={32} className="text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold mb-1">No transactions found</h3>
+            <p className="text-sm text-muted-foreground max-w-sm">
+              We couldn't find any transactions matching your filters. Try adjusting your search or adding a new transaction.
+            </p>
           </div>
         ) : (
           sortedDates.map(dateKey => (
@@ -127,37 +133,47 @@ export default async function TransactionsPage(props: { searchParams?: Promise<{
                   const { icon: Icon, color, bg } = getTypeStyles(tx.type);
                   const amountNum = Number(tx.amount);
                   const convertedNum = Number(tx.convertedAmount);
+                  const formattedDateTime = new Date(tx.date).toLocaleString('en-US', { 
+                    month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' 
+                  });
 
                   return (
-                    <Card key={tx.id} className="overflow-hidden hover:bg-muted/50 transition-colors cursor-pointer border-none shadow-sm">
-                      <CardContent className="p-4 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-xl ${bg} ${color}`}>
-                            <Icon size={20} />
+                    <Card key={tx.id} className="overflow-hidden bg-card hover:bg-muted/50 border transition-colors cursor-pointer shadow-sm group">
+                      <CardContent className="p-3 sm:p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2.5 rounded-lg ${bg} ${color}`}>
+                            <Icon size={18} />
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <p className="font-semibold">{tx.category.name}</p>
-                              <span className="text-[10px] uppercase font-bold tracking-wider bg-muted text-muted-foreground px-2 py-0.5 rounded-sm">
+                              <p className="font-medium text-sm">{tx.category.name}</p>
+                              <span className="text-[10px] uppercase font-bold tracking-wider bg-muted text-muted-foreground px-1.5 py-0.5 rounded-sm">
                                 {tx.country.flag} {tx.country.name}
                               </span>
                             </div>
-                            <p className="text-sm text-muted-foreground mt-0.5">
-                              {tx.description || tx.currency.code}
-                            </p>
+                            <div className="text-xs text-muted-foreground mt-0.5 flex flex-wrap items-center gap-1.5">
+                              <span>{tx.description || tx.currency.code}</span>
+                              <span className="w-1 h-1 rounded-full bg-muted-foreground/30 hidden sm:inline-block"></span>
+                              <span className="text-[10px] opacity-70">{formattedDateTime}</span>
+                            </div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className={`font-bold ${tx.type === 'INCOME' ? 'text-emerald-500' : 'text-foreground'}`}>
+                          <p className={`font-bold text-base font-mono tracking-tight ${tx.type === 'INCOME' ? 'text-emerald-500' : tx.type === 'EXPENSE' ? 'text-rose-500' : 'text-sky-500'}`}>
                             {tx.type === 'INCOME' ? '+' : '-'}{amountNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                           </p>
-                          <p className="text-xs text-muted-foreground mt-0.5">
+                          <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">
                             ≈ {convertedNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currencyCode}
                           </p>
                         </div>
-                        <div className="ml-4 pl-4 border-l border-white/5 flex items-center justify-center">
+                        <div className="ml-4 pl-4 border-l border-border flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <TransactionCardActions 
-                            transaction={tx}
+                            transaction={{
+                              ...tx,
+                              amount: Number(tx.amount),
+                              convertedAmount: Number(tx.convertedAmount),
+                              exchangeRate: Number(tx.exchangeRate),
+                            }}
                             countries={countries}
                             currencies={currencies}
                             categories={categories}

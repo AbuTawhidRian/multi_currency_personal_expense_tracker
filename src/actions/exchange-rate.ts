@@ -56,7 +56,7 @@ export async function createExchangeRate(data: ExchangeRateInput) {
     revalidatePath("/add");
     revalidatePath("/dashboard");
 
-    return { success: true, exchangeRate };
+    return { success: true };
   } catch (error) {
     console.error("Create exchange rate error:", error);
     return { success: false, error: "Internal server error" };

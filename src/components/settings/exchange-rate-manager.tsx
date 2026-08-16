@@ -5,7 +5,6 @@ import { Plus, Edit, Trash2, MoreHorizontal, Loader2, ArrowRight } from "lucide-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Prisma } from "@prisma/client";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +28,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 type ExchangeRateType = {
   id: string;
-  rate: Prisma.Decimal;
+  rate: number;
   fromCurrency: { id: string; code: string; name: string };
   toCurrency: { id: string; code: string; name: string };
 };

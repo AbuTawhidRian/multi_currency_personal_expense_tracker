@@ -33,6 +33,14 @@ export default async function ExchangeRatesSettingsPage() {
     }
   });
 
+  // Serialize Decimal to plain number for client component
+  const serializedRates = rates.map((r) => ({
+    id: r.id,
+    rate: Number(r.rate),
+    fromCurrency: { id: r.fromCurrency.id, code: r.fromCurrency.code, name: r.fromCurrency.name },
+    toCurrency: { id: r.toCurrency.id, code: r.toCurrency.code, name: r.toCurrency.name },
+  }));
+
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
       <Link href="/settings" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -46,7 +54,7 @@ export default async function ExchangeRatesSettingsPage() {
       </div>
 
       <div className="pt-4">
-        <ExchangeRateManager rates={rates} currencies={currencies} />
+        <ExchangeRateManager rates={serializedRates} currencies={currencies} />
       </div>
     </div>
   );

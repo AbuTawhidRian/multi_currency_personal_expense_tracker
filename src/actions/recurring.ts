@@ -50,7 +50,7 @@ export async function createRecurringTransaction(data: RecurringInput) {
     revalidatePath("/recurring");
     revalidatePath("/dashboard");
 
-    return { success: true, recurring };
+    return { success: true };
   } catch (error) {
     console.error("Create recurring transaction error:", error);
     return { success: false, error: "Internal server error" };
@@ -95,7 +95,7 @@ export async function updateRecurringTransaction(id: string, data: RecurringInpu
     revalidatePath("/recurring");
     revalidatePath("/dashboard");
 
-    return { success: true, recurring };
+    return { success: true };
   } catch (error) {
     console.error("Update recurring transaction error:", error);
     return { success: false, error: "Internal server error" };
@@ -200,7 +200,7 @@ export async function executeRecurringTransaction(id: string) {
     revalidatePath("/transfers");
     revalidatePath("/recurring");
 
-    return { success: true, transaction };
+    return { success: true };
   } catch (error) {
     console.error("Execute recurring transaction error:", error);
     return { success: false, error: "Internal server error" };

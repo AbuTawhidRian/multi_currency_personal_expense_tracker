@@ -15,8 +15,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+export type SerializedTransaction = Omit<Transaction, "amount" | "convertedAmount" | "exchangeRate"> & {
+  amount: number;
+  convertedAmount: number;
+  exchangeRate: number;
+};
+
 interface TransactionCardActionsProps extends AddTransactionProps {
-  transaction: Transaction;
+  transaction: SerializedTransaction;
 }
 
 export function TransactionCardActions({ transaction, ...props }: TransactionCardActionsProps) {
