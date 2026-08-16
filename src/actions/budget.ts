@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { checkBudgetAlerts } from "@/actions/notification";
 
 const budgetSchema = z.object({
   categoryId: z.string().min(1, "Category is required"),
@@ -58,6 +59,8 @@ export async function createBudget(data: BudgetInput) {
 
     revalidatePath("/budgets");
     revalidatePath("/dashboard");
+
+    await checkBudgetAlerts(session.user.id);
 
     return { success: true, budget };
   } catch (error) {
@@ -117,6 +120,8 @@ export async function updateBudget(id: string, data: BudgetInput) {
 
     revalidatePath("/budgets");
     revalidatePath("/dashboard");
+
+    await checkBudgetAlerts(session.user.id);
 
     return { success: true, budget };
   } catch (error) {

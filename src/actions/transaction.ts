@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import { checkBudgetAlerts } from "@/actions/notification";
 
 const addTransactionSchema = z.object({
   type: z.enum(["INCOME", "EXPENSE", "TRANSFER"]),
@@ -79,6 +80,11 @@ export async function addTransaction(data: AddTransactionInput) {
     revalidatePath("/income");
     revalidatePath("/expenses");
     revalidatePath("/transfers");
+    revalidatePath("/budgets");
+
+    if (type === "EXPENSE") {
+      await checkBudgetAlerts(session.user.id);
+    }
     
     return { success: true, transaction };
   } catch (error) {
@@ -176,6 +182,11 @@ export async function updateTransaction(id: string, data: AddTransactionInput) {
     revalidatePath("/expenses");
     revalidatePath("/transfers");
     revalidatePath("/reports");
+    revalidatePath("/budgets");
+
+    if (type === "EXPENSE") {
+      await checkBudgetAlerts(session.user.id);
+    }
 
     return { success: true, transaction };
   } catch (error) {

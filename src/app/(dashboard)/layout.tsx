@@ -1,5 +1,6 @@
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { TopBar } from "@/components/layout/TopBar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -27,9 +28,12 @@ export default async function DashboardLayout({
         currencyCode={profile?.reportingCurrency?.code} 
         currencyName={profile?.reportingCurrency?.name} 
       />
-      <main className="flex-1 w-full pb-20 md:pb-0 relative overflow-x-hidden">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col min-w-0 pb-20 md:pb-0">
+        <TopBar currencyCode={profile?.reportingCurrency?.code} />
+        <main className="flex-1 w-full relative overflow-x-hidden">
+          {children}
+        </main>
+      </div>
       <BottomNav />
     </div>
   );

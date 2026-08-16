@@ -54,7 +54,10 @@ export function TransactionsFilter() {
       <Popover>
         <PopoverTrigger 
           render={
-            <div className={`border rounded-md p-2 cursor-pointer transition-colors flex items-center justify-center ${type !== 'ALL' ? 'bg-primary/20 border-primary/50 text-primary' : 'bg-card hover:bg-muted text-muted-foreground'}`} />
+            <button 
+              type="button"
+              className={`border rounded-md p-2 cursor-pointer transition-colors flex items-center justify-center ${type !== 'ALL' ? 'bg-primary/20 border-primary/50 text-primary' : 'bg-card hover:bg-muted text-muted-foreground'}`} 
+            />
           } 
         >
           <Filter size={20} />

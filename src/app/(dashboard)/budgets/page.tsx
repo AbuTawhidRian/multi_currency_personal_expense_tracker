@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { BudgetManager, BudgetWithProgress } from "@/components/budgets/budget-manager";
+import { checkBudgetAlerts } from "@/actions/notification";
 
 export default async function BudgetsPage() {
   const session = await getServerSession(authOptions);
@@ -10,6 +11,9 @@ export default async function BudgetsPage() {
   if (!session?.user?.id) {
     redirect("/login");
   }
+
+  // Check budget alerts on page load
+  await checkBudgetAlerts(session.user.id);
 
   const profile = await prisma.profile.findUnique({
     where: { userId: session.user.id },
