@@ -15,7 +15,7 @@ const navItems = [
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 
-export function Sidebar() {
+export function Sidebar({ currencyCode = 'AED', currencyName = 'UAE Dirham' }: { currencyCode?: string, currencyName?: string }) {
   const pathname = usePathname();
   const { data: session } = useSession();
 
@@ -48,14 +48,21 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        <div className="mt-4 px-1">
+          <Link href="/add" className="flex items-center justify-center gap-2 w-full bg-primary text-primary-foreground hover:bg-primary/90 px-3 py-2.5 rounded-lg transition-colors font-medium shadow-md shadow-primary/20">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            Add Transaction
+          </Link>
+        </div>
       </nav>
       
       <div className="mt-auto space-y-3 px-2 py-4">
         <div className="bg-muted p-4 rounded-xl border">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Reporting Currency</p>
           <div className="flex items-end gap-2 mt-1">
-            <p className="text-2xl font-bold leading-none">AED</p>
-            <p className="text-xs text-muted-foreground mb-0.5">UAE Dirham</p>
+            <p className="text-2xl font-bold leading-none">{currencyCode}</p>
+            <p className="text-xs text-muted-foreground mb-0.5">{currencyName}</p>
           </div>
         </div>
 

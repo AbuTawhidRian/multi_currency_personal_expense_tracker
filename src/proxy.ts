@@ -26,6 +26,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  // If user is authenticated but not onboarded, redirect to /onboarding
+  if (!token.isOnboarded && !pathname.startsWith("/onboarding")) {
+    return NextResponse.redirect(new URL("/onboarding", request.url));
+  }
+
+  // If user is onboarded and tries to access onboarding, redirect to dashboard
+  if (token.isOnboarded && pathname.startsWith("/onboarding")) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
   return NextResponse.next();
 }
 

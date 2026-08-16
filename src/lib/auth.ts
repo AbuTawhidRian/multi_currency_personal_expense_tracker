@@ -60,7 +60,7 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
       if (user) {
         token.id = user.id;
       }
@@ -68,11 +68,26 @@ export const authOptions: NextAuthOptions = {
       if (account && user) {
         token.id = user.id;
       }
+      
+      // Allow manual update of session to trigger JWT refresh
+      if (trigger === "update" && session?.isOnboarded) {
+        token.isOnboarded = true;
+      }
+
+      // Check onboarding status on login if not yet set
+      if (token.id && token.isOnboarded === undefined) {
+        const profile = await prisma.profile.findUnique({
+          where: { userId: token.id as string }
+        });
+        token.isOnboarded = !!profile;
+      }
+
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
+        (session.user as any).isOnboarded = token.isOnboarded;
       }
       return session;
     }
