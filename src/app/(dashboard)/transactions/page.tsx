@@ -53,14 +53,19 @@ export default async function TransactionsPage(props: { searchParams?: Promise<{
       category: true,
       country: true,
       currency: true,
+      paymentMethod: true,
     },
   });
 
-  const [countries, currencies, categories, exchangeRates] = await Promise.all([
+  const [countries, currencies, categories, exchangeRates, paymentMethods] = await Promise.all([
     prisma.country.findMany({ orderBy: { name: "asc" } }),
     prisma.currency.findMany({ orderBy: { code: "asc" } }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
     prisma.exchangeRate.findMany({ where: { userId: session.user.id } }),
+    prisma.paymentMethod.findMany({
+      where: { OR: [{ userId: session.user.id }, { userId: null }] },
+      orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+    }),
   ]);
 
   // Group transactions by Date string (YYYY-MM-DD)
@@ -162,6 +167,7 @@ export default async function TransactionsPage(props: { searchParams?: Promise<{
                               toCurrencyId: r.toCurrencyId,
                               rate: Number(r.rate)
                             }))}
+                            paymentMethods={paymentMethods}
                           />
                         </div>
                       </CardContent>

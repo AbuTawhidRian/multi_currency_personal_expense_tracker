@@ -59,6 +59,14 @@ export default async function SettingsPage() {
             <div className="text-sm border px-3 py-1 rounded-md group-hover:border-primary group-hover:text-primary transition-colors">Manage</div>
           </Link>
           
+          <Link href="/settings/payment-methods" className="p-5 border rounded-xl bg-card shadow-sm flex items-center justify-between hover:bg-muted/50 transition-colors group">
+            <div>
+              <h4 className="font-semibold group-hover:text-primary transition-colors">Payment Methods</h4>
+              <p className="text-sm text-muted-foreground mt-1">Manage bank accounts, credit cards, and cash wallets.</p>
+            </div>
+            <div className="text-sm border px-3 py-1 rounded-md group-hover:border-primary group-hover:text-primary transition-colors">Manage</div>
+          </Link>
+          
           <Link href="/settings/categories" className="p-5 border rounded-xl bg-card shadow-sm flex items-center justify-between hover:bg-muted/50 transition-colors group">
             <div>
               <h4 className="font-semibold group-hover:text-primary transition-colors">Custom Categories</h4>

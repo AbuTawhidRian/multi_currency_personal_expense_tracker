@@ -15,6 +15,7 @@ const addTransactionSchema = z.object({
   exchangeRate: z.coerce.number().positive().default(1),
   date: z.string(), // ISO Date string
   description: z.string().optional(),
+  paymentMethodId: z.string().optional().nullable(),
 });
 
 export type AddTransactionInput = z.infer<typeof addTransactionSchema>;
@@ -40,6 +41,7 @@ export async function addTransaction(data: AddTransactionInput) {
       exchangeRate,
       date,
       description,
+      paymentMethodId,
     } = parsed.data;
 
     // Fetch user profile to get reporting currency
@@ -68,14 +70,18 @@ export async function addTransaction(data: AddTransactionInput) {
         date: new Date(date),
         reportingCurrencyId: profile.reportingCurrencyId,
         description,
+        paymentMethodId: paymentMethodId || null,
       },
     });
 
     revalidatePath("/dashboard");
     revalidatePath("/transactions");
+    revalidatePath("/income");
+    revalidatePath("/expenses");
+    revalidatePath("/transfers");
     
     return { success: true, transaction };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Add transaction error:", error);
     return { success: false, error: "Internal server error" };
   }
@@ -103,10 +109,13 @@ export async function deleteTransaction(id: string) {
 
     revalidatePath("/dashboard");
     revalidatePath("/transactions");
+    revalidatePath("/income");
+    revalidatePath("/expenses");
+    revalidatePath("/transfers");
     revalidatePath("/reports");
 
     return { success: true };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Delete transaction error:", error);
     return { success: false, error: "Internal server error" };
   }
@@ -141,7 +150,7 @@ export async function updateTransaction(id: string, data: AddTransactionInput) {
       return { success: false, error: "User profile or reporting currency not found" };
     }
 
-    const { type, amount, currencyId, countryId, categoryId, exchangeRate, date, description } = parsed.data;
+    const { type, amount, currencyId, countryId, categoryId, exchangeRate, date, description, paymentMethodId } = parsed.data;
     const convertedAmount = amount * exchangeRate;
 
     const transaction = await prisma.transaction.update({
@@ -157,15 +166,19 @@ export async function updateTransaction(id: string, data: AddTransactionInput) {
         date: new Date(date),
         reportingCurrencyId: profile.reportingCurrencyId,
         description,
+        paymentMethodId: paymentMethodId || null,
       },
     });
 
     revalidatePath("/dashboard");
     revalidatePath("/transactions");
+    revalidatePath("/income");
+    revalidatePath("/expenses");
+    revalidatePath("/transfers");
     revalidatePath("/reports");
 
     return { success: true, transaction };
-  } catch (error: any) {
+  } catch (error) {
     console.error("Update transaction error:", error);
     return { success: false, error: "Internal server error" };
   }

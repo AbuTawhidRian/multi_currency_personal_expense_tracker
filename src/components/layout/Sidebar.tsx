@@ -1,12 +1,14 @@
 "use client";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { PieChart, Wallet, ArrowRightLeft, Globe, ReceiptText, Settings, CreditCard, LayoutDashboard, LogOut } from 'lucide-react';
+import { PieChart, Wallet, ArrowRightLeft, Globe, ReceiptText, Settings, CreditCard, LayoutDashboard, LogOut, Target, RefreshCw } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Transactions', href: '/transactions', icon: ReceiptText },
+  { name: 'Budgets', href: '/budgets', icon: Target },
+  { name: 'Recurring', href: '/recurring', icon: RefreshCw },
   { name: 'Income', href: '/income', icon: Wallet },
   { name: 'Expenses', href: '/expenses', icon: CreditCard },
   { name: 'Transfers', href: '/transfers', icon: ArrowRightLeft },

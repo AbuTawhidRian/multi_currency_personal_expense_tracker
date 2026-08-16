@@ -22,6 +22,7 @@ const formSchema = z.object({
   exchangeRate: z.number().positive(),
   date: z.string().min(1, "Date is required"),
   description: z.string().optional(),
+  paymentMethodId: z.string().optional().nullable(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -35,9 +36,20 @@ export interface AddTransactionProps {
   transactionId?: string;
   initialData?: FormValues;
   customExchangeRates?: { fromCurrencyId: string; toCurrencyId: string; rate: number }[];
+  paymentMethods?: { id: string; name: string }[];
 }
 
-export function AddTransactionForm({ countries, currencies, categories, reportingCurrencyId, onSuccess, transactionId, initialData, customExchangeRates = [] }: AddTransactionProps) {
+export function AddTransactionForm({
+  countries,
+  currencies,
+  categories,
+  reportingCurrencyId,
+  onSuccess,
+  transactionId,
+  initialData,
+  customExchangeRates = [],
+  paymentMethods = [],
+}: AddTransactionProps) {
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
@@ -53,6 +65,7 @@ export function AddTransactionForm({ countries, currencies, categories, reportin
       exchangeRate: 1,
       date: new Date().toISOString().split("T")[0],
       description: "",
+      paymentMethodId: "",
     },
   });
 
@@ -244,18 +257,37 @@ export function AddTransactionForm({ countries, currencies, categories, reportin
         </div>
       </div>
 
-      {/* Date */}
-      <div className="space-y-2">
-        <Label htmlFor="date">Date</Label>
-        <Input
-          id="date"
-          type="date"
-          className="bg-white/5 border-white/10 text-white"
-          {...form.register("date")}
-        />
-        {form.formState.errors.date && (
-          <p className="text-xs text-red-400">{form.formState.errors.date.message}</p>
-        )}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Date */}
+        <div className="space-y-2">
+          <Label htmlFor="date">Date</Label>
+          <Input
+            id="date"
+            type="date"
+            className="bg-white/5 border-white/10 text-white"
+            {...form.register("date")}
+          />
+          {form.formState.errors.date && (
+            <p className="text-xs text-red-400">{form.formState.errors.date.message}</p>
+          )}
+        </div>
+
+        {/* Payment Method */}
+        <div className="space-y-2">
+          <Label htmlFor="paymentMethodId">Payment Method (Optional)</Label>
+          <select
+            id="paymentMethodId"
+            className="flex h-10 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-violet-500/50 disabled:cursor-not-allowed disabled:opacity-50"
+            {...form.register("paymentMethodId")}
+          >
+            <option value="" className="bg-[#080b14] text-white/50">Select method (e.g. Cash, Card)</option>
+            {paymentMethods.map((pm) => (
+              <option key={pm.id} value={pm.id} className="bg-[#080b14] text-white">
+                {pm.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Description */}
