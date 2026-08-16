@@ -3,10 +3,16 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Search, Filter, Wallet, CreditCard, ArrowRightLeft } from "lucide-react";
+import { Wallet, CreditCard, ArrowRightLeft } from "lucide-react";
+import { TransactionCardActions } from "@/components/transactions/transaction-card-actions";
+import { TransactionsFilter } from "@/components/transactions/transactions-filter";
+import { Prisma } from "@prisma/client";
 
-export default async function TransactionsPage() {
+export default async function TransactionsPage(props: { searchParams?: Promise<{ query?: string, type?: string }> }) {
+  const searchParams = props.searchParams ? await props.searchParams : {};
+  const query = searchParams.query || "";
+  const typeParam = searchParams.type || "ALL";
+
   const session = await getServerSession(authOptions);
   
   if (!session?.user) {
@@ -24,8 +30,24 @@ export default async function TransactionsPage() {
 
   const currencyCode = profile.reportingCurrency?.code || "AED";
 
+  // Build the dynamic where clause
+  const whereClause: Prisma.TransactionWhereInput = {
+    userId: session.user.id,
+  };
+
+  if (typeParam !== "ALL") {
+    whereClause.type = typeParam as any;
+  }
+
+  if (query) {
+    whereClause.OR = [
+      { description: { contains: query, mode: "insensitive" } },
+      { category: { name: { contains: query, mode: "insensitive" } } },
+    ];
+  }
+
   const transactions = await prisma.transaction.findMany({
-    where: { userId: session.user.id },
+    where: whereClause,
     orderBy: { date: "desc" },
     include: {
       category: true,
@@ -33,6 +55,12 @@ export default async function TransactionsPage() {
       currency: true,
     },
   });
+
+  const [countries, currencies, categories] = await Promise.all([
+    prisma.country.findMany({ orderBy: { name: "asc" } }),
+    prisma.currency.findMany({ orderBy: { code: "asc" } }),
+    prisma.category.findMany({ orderBy: { name: "asc" } }),
+  ]);
 
   // Group transactions by Date string (YYYY-MM-DD)
   const groupedTransactions: Record<string, typeof transactions> = {};
@@ -73,15 +101,7 @@ export default async function TransactionsPage() {
           <p className="text-muted-foreground mt-1">View and filter your financial history.</p>
         </div>
         
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1 md:w-64">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search..." className="pl-9 bg-card" />
-          </div>
-          <div className="bg-card border rounded-md p-2 cursor-pointer hover:bg-muted transition-colors">
-            <Filter size={20} className="text-muted-foreground" />
-          </div>
-        </div>
+        <TransactionsFilter />
       </div>
 
       <div className="space-y-8 mt-6">
@@ -128,6 +148,15 @@ export default async function TransactionsPage() {
                           <p className="text-xs text-muted-foreground mt-0.5">
                             ≈ {convertedNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currencyCode}
                           </p>
+                        </div>
+                        <div className="ml-4 pl-4 border-l border-white/5 flex items-center justify-center">
+                          <TransactionCardActions 
+                            transaction={tx}
+                            countries={countries}
+                            currencies={currencies}
+                            categories={categories}
+                            reportingCurrencyId={profile.reportingCurrencyId!}
+                          />
                         </div>
                       </CardContent>
                     </Card>

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { addTransaction } from "@/actions/transaction";
+import { addTransaction, updateTransaction } from "@/actions/transaction";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -32,16 +32,18 @@ export interface AddTransactionProps {
   categories: { id: string; name: string; type: string }[];
   reportingCurrencyId: string;
   onSuccess?: () => void;
+  transactionId?: string;
+  initialData?: FormValues;
 }
 
-export function AddTransactionForm({ countries, currencies, categories, reportingCurrencyId, onSuccess }: AddTransactionProps) {
+export function AddTransactionForm({ countries, currencies, categories, reportingCurrencyId, onSuccess, transactionId, initialData }: AddTransactionProps) {
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       type: "EXPENSE",
       amount: 0,
       currencyId: reportingCurrencyId,
@@ -63,7 +65,13 @@ export function AddTransactionForm({ countries, currencies, categories, reportin
     setLoading(true);
     setError("");
     try {
-      const result = await addTransaction(data);
+      let result;
+      if (transactionId) {
+        result = await updateTransaction(transactionId, data);
+      } else {
+        result = await addTransaction(data);
+      }
+      
       if (!result.success) {
         setError(result.error as string);
       } else {
@@ -247,7 +255,7 @@ export function AddTransactionForm({ countries, currencies, categories, reportin
         disabled={loading}
       >
         {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-        {loading ? "Saving..." : "Save Transaction"}
+        {loading ? "Saving..." : transactionId ? "Update Transaction" : "Save Transaction"}
       </Button>
     </form>
   );

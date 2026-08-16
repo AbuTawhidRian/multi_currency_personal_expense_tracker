@@ -80,3 +80,94 @@ export async function addTransaction(data: AddTransactionInput) {
     return { success: false, error: "Internal server error" };
   }
 }
+
+export async function deleteTransaction(id: string) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    // Verify ownership
+    const transaction = await prisma.transaction.findUnique({
+      where: { id },
+    });
+
+    if (!transaction || transaction.userId !== session.user.id) {
+      return { success: false, error: "Transaction not found or unauthorized" };
+    }
+
+    await prisma.transaction.delete({
+      where: { id },
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/transactions");
+    revalidatePath("/reports");
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Delete transaction error:", error);
+    return { success: false, error: "Internal server error" };
+  }
+}
+
+export async function updateTransaction(id: string, data: AddTransactionInput) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const parsed = addTransactionSchema.safeParse(data);
+    if (!parsed.success) {
+      return { success: false, error: "Invalid data", details: parsed.error.issues };
+    }
+
+    // Verify ownership
+    const existingTransaction = await prisma.transaction.findUnique({
+      where: { id },
+    });
+
+    if (!existingTransaction || existingTransaction.userId !== session.user.id) {
+      return { success: false, error: "Transaction not found or unauthorized" };
+    }
+
+    const profile = await prisma.profile.findUnique({
+      where: { userId: session.user.id },
+    });
+
+    if (!profile?.reportingCurrencyId) {
+      return { success: false, error: "User profile or reporting currency not found" };
+    }
+
+    const { type, amount, currencyId, countryId, categoryId, exchangeRate, date, description } = parsed.data;
+    const convertedAmount = amount * exchangeRate;
+
+    const transaction = await prisma.transaction.update({
+      where: { id },
+      data: {
+        type,
+        amount,
+        currencyId,
+        countryId,
+        categoryId,
+        exchangeRate,
+        convertedAmount,
+        date: new Date(date),
+        reportingCurrencyId: profile.reportingCurrencyId,
+        description,
+      },
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/transactions");
+    revalidatePath("/reports");
+
+    return { success: true, transaction };
+  } catch (error: any) {
+    console.error("Update transaction error:", error);
+    return { success: false, error: "Internal server error" };
+  }
+}
+
