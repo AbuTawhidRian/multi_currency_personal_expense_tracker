@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { ProfileSettingsForm } from "@/components/settings/profile-settings-form";
 
 export default async function SettingsPage() {
@@ -58,13 +59,13 @@ export default async function SettingsPage() {
             <div className="text-sm border px-3 py-1 rounded-md">Coming Soon</div>
           </div>
           
-          <div className="p-5 border rounded-xl bg-card shadow-sm flex items-center justify-between opacity-50 cursor-not-allowed">
+          <Link href="/settings/categories" className="p-5 border rounded-xl bg-card shadow-sm flex items-center justify-between hover:bg-muted/50 transition-colors group">
             <div>
-              <h4 className="font-semibold">Custom Categories</h4>
+              <h4 className="font-semibold group-hover:text-primary transition-colors">Custom Categories</h4>
               <p className="text-sm text-muted-foreground mt-1">Add or remove your custom categories.</p>
             </div>
-            <div className="text-sm border px-3 py-1 rounded-md">Coming Soon</div>
-          </div>
+            <div className="text-sm border px-3 py-1 rounded-md group-hover:border-primary group-hover:text-primary transition-colors">Manage</div>
+          </Link>
         </section>
       </div>
     </div>
