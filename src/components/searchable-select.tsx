@@ -5,14 +5,6 @@ import { Check, ChevronsUpDown } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
 import { Command as CommandPrimitive } from "cmdk"
 
 interface SearchableSelectProps {
@@ -20,7 +12,6 @@ interface SearchableSelectProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
-  searchPlaceholder?: string;
   className?: string;
 }
 
@@ -29,7 +20,6 @@ export function SearchableSelect({
   value,
   onChange,
   placeholder = "Select an option...",
-  searchPlaceholder = "Search...",
   className
 }: SearchableSelectProps) {
   const [open, setOpen] = React.useState(false)
@@ -42,9 +32,11 @@ export function SearchableSelect({
   )
 
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!open) {
       setSearchQuery(selectedLabel || "")
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchQuery("")
     }
   }, [open, selectedLabel])

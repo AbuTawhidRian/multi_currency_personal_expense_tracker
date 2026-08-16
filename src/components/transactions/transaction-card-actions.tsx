@@ -1,5 +1,7 @@
 "use client";
 
+import { Transaction } from "@prisma/client";
+
 import { useState } from "react";
 import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -14,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 
 interface TransactionCardActionsProps extends AddTransactionProps {
-  transaction: any;
+  transaction: Transaction;
 }
 
 export function TransactionCardActions({ transaction, ...props }: TransactionCardActionsProps) {
@@ -45,7 +47,7 @@ export function TransactionCardActions({ transaction, ...props }: TransactionCar
   };
 
   const initialData = {
-    type: transaction.type,
+    type: transaction.type as "INCOME" | "EXPENSE" | "TRANSFER",
     amount: Number(transaction.amount),
     currencyId: transaction.currencyId,
     countryId: transaction.countryId,
@@ -91,7 +93,7 @@ export function TransactionCardActions({ transaction, ...props }: TransactionCar
             <AddTransactionForm 
               {...props} 
               transactionId={transaction.id}
-              initialData={initialData as any}
+              initialData={initialData}
               onSuccess={() => setEditModalOpen(false)} 
             />
           </div>

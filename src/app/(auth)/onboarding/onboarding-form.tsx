@@ -64,8 +64,8 @@ export function OnboardingForm({ countryOptions, currencyOptions }: Props) {
 
       router.push('/dashboard');
       router.refresh();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
       setLoading(false);
     }
   };
@@ -83,7 +83,6 @@ export function OnboardingForm({ countryOptions, currencyOptions }: Props) {
           value={currentCountry}
           onChange={setCurrentCountry}
           placeholder="Select current country"
-          searchPlaceholder="Search country..."
         />
         <p className="text-xs text-white/30 pt-1">Where you currently live and work.</p>
       </div>
@@ -99,7 +98,6 @@ export function OnboardingForm({ countryOptions, currencyOptions }: Props) {
           value={homeCountry}
           onChange={setHomeCountry}
           placeholder="Select home country"
-          searchPlaceholder="Search country..."
         />
         <p className="text-xs text-white/30 pt-1">Where you send money or plan to return.</p>
       </div>
@@ -115,7 +113,6 @@ export function OnboardingForm({ countryOptions, currencyOptions }: Props) {
           value={currency}
           onChange={setCurrency}
           placeholder="Select reporting currency"
-          searchPlaceholder="Search currency..."
         />
         <p className="text-xs text-white/30 pt-1">The base currency for your dashboard charts.</p>
       </div>

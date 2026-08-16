@@ -19,13 +19,14 @@ export default async function AddTransactionPage() {
     redirect("/onboarding");
   }
 
-  const [countries, currencies, categories] = await Promise.all([
+  const [countries, currencies, categories, exchangeRates] = await Promise.all([
     prisma.country.findMany({ orderBy: { name: "asc" } }),
     prisma.currency.findMany({ orderBy: { code: "asc" } }),
     prisma.category.findMany({
       where: { OR: [{ userId: session.user.id }, { isDefault: true }] },
       orderBy: { name: "asc" },
     }),
+    prisma.exchangeRate.findMany({ where: { userId: session.user.id } }),
   ]);
 
   return (
@@ -41,6 +42,11 @@ export default async function AddTransactionPage() {
           currencies={currencies}
           categories={categories}
           reportingCurrencyId={profile.reportingCurrencyId}
+          customExchangeRates={exchangeRates.map(r => ({
+            fromCurrencyId: r.fromCurrencyId,
+            toCurrencyId: r.toCurrencyId,
+            rate: Number(r.rate)
+          }))}
         />
       </div>
     </div>

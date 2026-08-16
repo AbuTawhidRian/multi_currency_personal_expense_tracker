@@ -51,13 +51,13 @@ export default async function SettingsPage() {
         <section className="space-y-4 pt-6 border-t">
           <h3 className="font-semibold text-lg px-1">Other Settings</h3>
           
-          <div className="p-5 border rounded-xl bg-card shadow-sm flex items-center justify-between opacity-50 cursor-not-allowed">
+          <Link href="/settings/exchange-rates" className="p-5 border rounded-xl bg-card shadow-sm flex items-center justify-between hover:bg-muted/50 transition-colors group">
             <div>
-              <h4 className="font-semibold">Exchange Rates</h4>
+              <h4 className="font-semibold group-hover:text-primary transition-colors">Exchange Rates</h4>
               <p className="text-sm text-muted-foreground mt-1">Manage your personal exchange rates.</p>
             </div>
-            <div className="text-sm border px-3 py-1 rounded-md">Coming Soon</div>
-          </div>
+            <div className="text-sm border px-3 py-1 rounded-md group-hover:border-primary group-hover:text-primary transition-colors">Manage</div>
+          </Link>
           
           <Link href="/settings/categories" className="p-5 border rounded-xl bg-card shadow-sm flex items-center justify-between hover:bg-muted/50 transition-colors group">
             <div>

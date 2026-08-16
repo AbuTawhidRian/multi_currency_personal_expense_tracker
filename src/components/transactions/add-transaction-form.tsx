@@ -34,9 +34,10 @@ export interface AddTransactionProps {
   onSuccess?: () => void;
   transactionId?: string;
   initialData?: FormValues;
+  customExchangeRates?: { fromCurrencyId: string; toCurrencyId: string; rate: number }[];
 }
 
-export function AddTransactionForm({ countries, currencies, categories, reportingCurrencyId, onSuccess, transactionId, initialData }: AddTransactionProps) {
+export function AddTransactionForm({ countries, currencies, categories, reportingCurrencyId, onSuccess, transactionId, initialData, customExchangeRates = [] }: AddTransactionProps) {
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState("");
@@ -55,7 +56,30 @@ export function AddTransactionForm({ countries, currencies, categories, reportin
     },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const currentType = form.watch("type");
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const currentCurrency = form.watch("currencyId");
+  const [usingCustomRate, setUsingCustomRate] = React.useState(false);
+
+  React.useEffect(() => {
+    // Only auto-populate if we are NOT editing an existing transaction (initialData is empty)
+    // or if the user is changing the currency away from the initial one.
+    if (currentCurrency && currentCurrency !== reportingCurrencyId && (!initialData || currentCurrency !== initialData.currencyId)) {
+      const customRate = customExchangeRates.find(
+        (r) => r.fromCurrencyId === currentCurrency && r.toCurrencyId === reportingCurrencyId
+      );
+      if (customRate) {
+        form.setValue("exchangeRate", customRate.rate);
+        setUsingCustomRate(true);
+      } else {
+        setUsingCustomRate(false);
+      }
+    } else {
+      setUsingCustomRate(false);
+    }
+  }, [currentCurrency, reportingCurrencyId, customExchangeRates, form, initialData]);
+
   // Filter categories by selected type
   const filteredCategories = categories.filter(
     (c) => c.type === currentType || c.type === "BOTH"
@@ -78,8 +102,8 @@ export function AddTransactionForm({ countries, currencies, categories, reportin
         onSuccess?.();
         router.push("/dashboard");
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -97,7 +121,7 @@ export function AddTransactionForm({ countries, currencies, categories, reportin
       <Tabs
         value={currentType}
         onValueChange={(v) => {
-          form.setValue("type", v as any);
+          form.setValue("type", v as "INCOME" | "EXPENSE" | "TRANSFER");
           form.setValue("categoryId", ""); // Reset category when type changes
         }}
         className="w-full"
@@ -169,6 +193,9 @@ export function AddTransactionForm({ countries, currencies, categories, reportin
             className="bg-white/5 border-white/10 text-white"
             {...form.register("exchangeRate", { valueAsNumber: true })}
           />
+          {usingCustomRate && !form.formState.errors.exchangeRate && (
+            <p className="text-xs text-emerald-400">Using custom exchange rate</p>
+          )}
           {form.formState.errors.exchangeRate && (
             <p className="text-xs text-red-400">{form.formState.errors.exchangeRate.message}</p>
           )}

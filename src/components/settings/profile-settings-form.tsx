@@ -52,8 +52,8 @@ export function ProfileSettingsForm({ user, profile, countries, currencies }: Pr
         throw new Error(res.error || "Failed to update profile");
       }
       setMessage({ type: 'success', text: "Profile updated successfully!" });
-    } catch (err: any) {
-      setMessage({ type: 'error', text: err.message });
+    } catch (err) {
+      setMessage({ type: 'error', text: err instanceof Error ? err.message : String(err) });
     } finally {
       setLoading(false);
     }
