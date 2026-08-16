@@ -2,9 +2,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExpensesByCategory } from "@/components/reports/expenses-by-category";
 import { IncomeVsExpense } from "@/components/reports/income-vs-expense";
+import { FileText, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 // A set of vibrant colors for the pie chart
 const CHART_COLORS = [
@@ -83,9 +86,19 @@ export default async function ReportsPage() {
 
   return (
     <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Reports & Analytics</h1>
-        <p className="text-muted-foreground mt-1">Visualize your financial data in {currencyCode}.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Reports & Analytics</h1>
+          <p className="text-muted-foreground mt-1">Visualize your financial data in {currencyCode}.</p>
+        </div>
+        
+        <Link href="/reports/statement">
+          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20 text-sm font-semibold">
+            <FileText className="mr-2 h-4 w-4" />
+            Financial Statement & PDF
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
