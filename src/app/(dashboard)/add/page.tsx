@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { AddTransactionForm } from "./add-transaction-form";
+import { AddTransactionForm } from "@/components/transactions/add-transaction-form";
 
 export default async function AddTransactionPage() {
   const session = await getServerSession(authOptions);
@@ -35,12 +35,14 @@ export default async function AddTransactionPage() {
         <p className="text-muted-foreground mt-1">Record a new expense, income, or transfer.</p>
       </div>
 
-      <AddTransactionForm
-        countries={countries}
-        currencies={currencies}
-        categories={categories}
-        reportingCurrencyId={profile.reportingCurrencyId}
-      />
+      <div className="bg-[#0a0e1a] p-6 rounded-2xl shadow-xl border border-black/10 dark:border-white/10 text-white">
+        <AddTransactionForm
+          countries={countries}
+          currencies={currencies}
+          categories={categories}
+          reportingCurrencyId={profile.reportingCurrencyId}
+        />
+      </div>
     </div>
   );
 }

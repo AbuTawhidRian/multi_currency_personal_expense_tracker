@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, CreditCard, TrendingUp, PieChart } from "lucide-react";
+import { AddTransactionModal } from "@/components/transactions/add-transaction-modal";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -41,6 +42,15 @@ export default async function DashboardPage() {
       category: true,
     },
   });
+
+  const [countries, currencies, categories] = await Promise.all([
+    prisma.country.findMany({ orderBy: { name: "asc" } }),
+    prisma.currency.findMany({ orderBy: { code: "asc" } }),
+    prisma.category.findMany({
+      where: { OR: [{ userId: session.user.id }, { isDefault: true }] },
+      orderBy: { name: "asc" },
+    }),
+  ]);
 
   // Calculate KPIs
   let totalIncome = 0;
@@ -83,12 +93,20 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Welcome back, {session.user.name?.split(" ")[0]}</h1>
-        <p className="text-muted-foreground mt-1">
-          Here is your financial overview for{" "}
-          {now.toLocaleString("default", { month: "long", year: "numeric" })}
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Welcome back, {session.user.name?.split(" ")[0]}</h1>
+          <p className="text-muted-foreground mt-1">
+            Here is your financial overview for{" "}
+            {now.toLocaleString("default", { month: "long", year: "numeric" })}
+          </p>
+        </div>
+        <AddTransactionModal
+          countries={countries}
+          currencies={currencies}
+          categories={categories}
+          reportingCurrencyId={profile.reportingCurrencyId}
+        />
       </div>
 
       {/* Main KPI Cards */}

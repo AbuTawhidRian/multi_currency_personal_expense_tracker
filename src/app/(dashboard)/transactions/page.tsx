@@ -1,47 +1,70 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Wallet, CreditCard, ArrowRightLeft } from "lucide-react";
 
-const mockTransactions = [
-  {
-    id: 1,
-    type: "INCOME",
-    category: "Salary",
-    country: "🇦🇪 UAE",
-    amount: "AED 8,000",
-    converted: "AED 8,000",
-    date: "15 Aug 2026",
-    icon: Wallet,
-    color: "text-emerald-500",
-    bg: "bg-emerald-500/10"
-  },
-  {
-    id: 2,
-    type: "EXPENSE",
-    category: "Room Rent",
-    country: "🇦🇪 UAE",
-    amount: "AED 2,000",
-    converted: "AED 2,000",
-    date: "15 Aug 2026",
-    icon: CreditCard,
-    color: "text-destructive",
-    bg: "bg-destructive/10"
-  },
-  {
-    id: 3,
-    type: "TRANSFER",
-    category: "Family Support",
-    country: "🇧🇩 Bangladesh",
-    amount: "BDT 20,000",
-    converted: "AED 625",
-    date: "15 Aug 2026",
-    icon: ArrowRightLeft,
-    color: "text-blue-500",
-    bg: "bg-blue-500/10"
+export default async function TransactionsPage() {
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user) {
+    redirect("/login");
   }
-];
 
-export default function TransactionsPage() {
+  const profile = await prisma.profile.findUnique({
+    where: { userId: session.user.id },
+    include: { reportingCurrency: true },
+  });
+
+  if (!profile?.reportingCurrencyId) {
+    redirect("/onboarding");
+  }
+
+  const currencyCode = profile.reportingCurrency?.code || "AED";
+
+  const transactions = await prisma.transaction.findMany({
+    where: { userId: session.user.id },
+    orderBy: { date: "desc" },
+    include: {
+      category: true,
+      country: true,
+      currency: true,
+    },
+  });
+
+  // Group transactions by Date string (YYYY-MM-DD)
+  const groupedTransactions: Record<string, typeof transactions> = {};
+  
+  transactions.forEach(tx => {
+    const dateKey = tx.date.toISOString().split("T")[0];
+    if (!groupedTransactions[dateKey]) {
+      groupedTransactions[dateKey] = [];
+    }
+    groupedTransactions[dateKey].push(tx);
+  });
+
+  const formatGroupHeader = (dateStr: string) => {
+    const txDate = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (txDate.toDateString() === today.toDateString()) return "Today";
+    if (txDate.toDateString() === yesterday.toDateString()) return "Yesterday";
+    return txDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  };
+
+  const getTypeStyles = (type: string) => {
+    if (type === "INCOME") return { icon: Wallet, color: "text-emerald-500", bg: "bg-emerald-500/10" };
+    if (type === "EXPENSE") return { icon: CreditCard, color: "text-destructive", bg: "bg-destructive/10" };
+    return { icon: ArrowRightLeft, color: "text-sky-500", bg: "bg-sky-500/10" };
+  };
+
+  // Sort groups by date descending
+  const sortedDates = Object.keys(groupedTransactions).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -53,7 +76,7 @@ export default function TransactionsPage() {
         <div className="flex items-center gap-2">
           <div className="relative flex-1 md:w-64">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Search..." className="pl-9" />
+            <Input placeholder="Search..." className="pl-9 bg-card" />
           </div>
           <div className="bg-card border rounded-md p-2 cursor-pointer hover:bg-muted transition-colors">
             <Filter size={20} className="text-muted-foreground" />
@@ -61,38 +84,59 @@ export default function TransactionsPage() {
         </div>
       </div>
 
-      <div className="space-y-4 mt-6">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Today</h3>
-        
-        <div className="space-y-3">
-          {mockTransactions.map((tx) => {
-            const Icon = tx.icon;
-            return (
-              <Card key={tx.id} className="overflow-hidden hover:bg-muted/50 transition-colors cursor-pointer border-none shadow-sm">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-xl ${tx.bg} ${tx.color}`}>
-                      <Icon size={20} />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold">{tx.category}</p>
-                        <span className="text-[10px] uppercase font-bold tracking-wider bg-muted text-muted-foreground px-2 py-0.5 rounded-sm">{tx.country}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-0.5">{tx.date}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className={`font-bold ${tx.type === 'INCOME' ? 'text-emerald-500' : 'text-foreground'}`}>
-                      {tx.type === 'INCOME' ? '+' : '-'}{tx.amount}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">≈ {tx.converted}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
+      <div className="space-y-8 mt-6">
+        {sortedDates.length === 0 ? (
+          <div className="text-center p-12 bg-muted/20 border rounded-2xl text-muted-foreground">
+            No transactions found. Add a transaction to get started!
+          </div>
+        ) : (
+          sortedDates.map(dateKey => (
+            <div key={dateKey} className="space-y-4">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                {formatGroupHeader(dateKey)}
+              </h3>
+              
+              <div className="space-y-3">
+                {groupedTransactions[dateKey].map((tx) => {
+                  const { icon: Icon, color, bg } = getTypeStyles(tx.type);
+                  const amountNum = Number(tx.amount);
+                  const convertedNum = Number(tx.convertedAmount);
+
+                  return (
+                    <Card key={tx.id} className="overflow-hidden hover:bg-muted/50 transition-colors cursor-pointer border-none shadow-sm">
+                      <CardContent className="p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className={`p-3 rounded-xl ${bg} ${color}`}>
+                            <Icon size={20} />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold">{tx.category.name}</p>
+                              <span className="text-[10px] uppercase font-bold tracking-wider bg-muted text-muted-foreground px-2 py-0.5 rounded-sm">
+                                {tx.country.flag} {tx.country.name}
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-0.5">
+                              {tx.description || tx.currency.code}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className={`font-bold ${tx.type === 'INCOME' ? 'text-emerald-500' : 'text-foreground'}`}>
+                            {tx.type === 'INCOME' ? '+' : '-'}{amountNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            ≈ {convertedNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currencyCode}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
